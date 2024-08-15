@@ -7,10 +7,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+import java.security.Principal;
+
+@RestController
 public class CustomerController {
     @Autowired
     private CustomerService cService;
@@ -58,4 +59,11 @@ public class CustomerController {
                                           @RequestParam(defaultValue = "10") int size) {
         return cService.searchCustomers(searchType, searchText, page, size);
     }
+
+
+    ////////////////////////////////// JWT //////////////////////////////////
+//    @GetMapping("/current-user")
+//    public String getLoggedInUser(Principal principal){
+//        return principal.getName();
+//    }
 }

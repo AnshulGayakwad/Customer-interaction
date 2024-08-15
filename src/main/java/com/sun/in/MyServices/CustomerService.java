@@ -19,7 +19,6 @@ public class CustomerService {
         return cRepo.save(customer);
     }
 
-
     public Customer updateCustomer(Long id, Customer customerDetails) {
         Customer customer = cRepo.findById(id).orElseThrow(() -> new RuntimeException("Customer not found"));
 
