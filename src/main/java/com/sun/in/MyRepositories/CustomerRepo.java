@@ -6,8 +6,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface CustomerRepo extends JpaRepository<Customer, Long> {
     Page<Customer> findByFirstNameContainingOrCityContainingOrEmailContainingOrPhoneContaining(
             String firstName, String city, String email, String phone, Pageable pageable);
+
+    Optional<Customer> findByUserName(String username);
 }

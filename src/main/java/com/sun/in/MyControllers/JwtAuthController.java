@@ -1,7 +1,9 @@
 package com.sun.in.MyControllers;
 
+import com.sun.in.MyEntities.AllUsers;
 import com.sun.in.MyEntities.JwtRequest;
 import com.sun.in.MyEntities.JwtResponse;
+import com.sun.in.MyRepositories.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,12 +12,15 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.sun.in.Security.JwtHelper;
 
 @RestController
+@RequestMapping("/auth")
 public class JwtAuthController {
     @Autowired
     private UserDetailsService userDetailsService;
@@ -23,6 +28,8 @@ public class JwtAuthController {
     private AuthenticationManager manager;
     @Autowired
     private JwtHelper helper;
+    @Autowired
+    private UserRepo userRepo;
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody JwtRequest request){
@@ -43,7 +50,17 @@ public class JwtAuthController {
             manager.authenticate(authentication);
         }
         catch (BadCredentialsException e) {
-            throw new BadCredentialsException(" Invalid Username or Password  !!");
+            throw new BadCredentialsException(" Invalid Username or Password  !!" + e.getMessage());
         }
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@RequestBody JwtRequest jwtRequest){
+        if(userRepo.findByUsername(jwtRequest.getUsername()).isPresent()){
+            return new ResponseEntity<>("Username already exists!", HttpStatus.CONFLICT);
+        }
+        AllUsers user = AllUsers.builder().username(jwtRequest.getUsername()).password(jwtRequest.getPassword()).build();
+        userRepo.save(user);
+        return new ResponseEntity<>("User registered successfully!", HttpStatus.OK);
     }
 }

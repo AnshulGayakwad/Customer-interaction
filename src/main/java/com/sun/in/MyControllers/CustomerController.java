@@ -7,59 +7,78 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
+import java.util.List;
 
 @RestController
+@RequestMapping("/home")
 public class CustomerController {
     @Autowired
-    private CustomerService cService;
+    private CustomerService customerService;
 
-    @GetMapping("/index")
-    public String index() {
-        return "index";
-    }
+//    @GetMapping("/index")
+//    public String index() {
+//        return "index";
+//    }
 
-    @PostMapping("/createCustomer")
-    public Customer createCustomer(@RequestBody Customer customer){
-        return cService.createCustomer(customer);
+    @PostMapping("/createCustomer") // New customer Added by Admin
+    public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer){
+        Customer cust = customerService.createCustomer(customer);
+        return new ResponseEntity<>(cust, HttpStatus.CREATED);
     }
 
     // API to update an existing customer
-    @PutMapping("/{id}")
-    public Customer updateCustomer(@PathVariable Long id, @RequestBody Customer customerDetails){
-        return cService.updateCustomer(id, customerDetails);
+    @PutMapping("/updateCustomer/{id}")    // Update Customer by ID
+    public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customerDetails){
+        Customer cust = customerService.updateCustomer(id, customerDetails);
+        return new ResponseEntity<>(cust, HttpStatus.OK);
     }
 
     // API to delete an existing customer
-    @DeleteMapping("/{id}")
-    public void deleteCustomer(@PathVariable Long id){
-        cService.deleteCustomer(id);
+    @DeleteMapping("/deleteCustomer/{id}")
+    public ResponseEntity deleteCustomer(@PathVariable Long id){
+        customerService.deleteCustomer(id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    //Get customer by ID
     @GetMapping("/{id}")
     public Customer getCustomerById(@PathVariable Long id){
-        return cService.getCustomerById(id);
+        return customerService.getCustomerById(id);
     }
 
-    @GetMapping
-    public Page<Customer> getAllCustomers(@RequestParam (defaultValue = "0") int page,
+    //Get All customers without any filters
+    @GetMapping("/getAllCustomers")
+    public ResponseEntity<List<Customer>> getAllCustomers(
+                                          @RequestParam (defaultValue = "0") int page,
                                           @RequestParam (defaultValue = "10") int size,
                                           @RequestParam (defaultValue = "firstName") String sortBy,
                                           @RequestParam (defaultValue = "asc") String sortDir){
-        Pageable pegeable = PageRequest.of(page, size, Sort.Direction.fromString(sortDir), sortBy);
-        return cService.getAllCustomers(pegeable);
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.fromString(sortDir), sortBy);
+        Page<Customer> customerList = customerService.getAllCustomers(pageable);
+        return new ResponseEntity<>(customerList.getContent(), HttpStatus.OK);
     }
 
     @GetMapping("/search")
-    public Page<Customer> searchCustomers(@RequestParam(defaultValue = "firstName") String searchType,
+    public ResponseEntity<List<Customer>> searchCustomers(
+                                          @RequestParam(defaultValue = "firstName") String searchType,
                                           @RequestParam(defaultValue = "") String searchText,
                                           @RequestParam(defaultValue = "0") int page,
                                           @RequestParam(defaultValue = "10") int size) {
-        return cService.searchCustomers(searchType, searchText, page, size);
+        Page<Customer> customerList = customerService.searchCustomers(searchType, searchText, page, size);
+        return new ResponseEntity<>(customerList.getContent(), HttpStatus.OK);
     }
 
+//    @GetMapping("/sync-customers")
+//    public ResponseEntity<String> syncCustomers() {
+//
+//        String result = syncapiService.authenticateFetchAndSyncCustomerList();
+//        return new ResponseEntity<>(result, HttpStatus.OK);
+//    }
 
     ////////////////////////////////// JWT //////////////////////////////////
 //    @GetMapping("/current-user")

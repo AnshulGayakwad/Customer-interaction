@@ -24,6 +24,14 @@ public class SecurityConfig {
         return new InMemoryUserDetailsManager(adminUser);
     }
 
+    ////////////////////////////////////////// Extra As Above //////////////////////////////////////////////////////////
+    @Bean
+    public UserDetailsService userDetailsService(String uName, String uPassword){
+        UserDetails adminUser = User.builder().username(uName).password(passwordEncoder().encode(uPassword)).roles("ADMIN").build();
+        return new InMemoryUserDetailsManager(adminUser);
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration builder) throws Exception {
         return builder.getAuthenticationManager();
