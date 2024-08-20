@@ -13,5 +13,5 @@ public interface CustomerRepo extends JpaRepository<Customer, Long> {
     Page<Customer> findByFirstNameContainingOrCityContainingOrEmailContainingOrPhoneContaining(
             String firstName, String city, String email, String phone, Pageable pageable);
 
-    Optional<Customer> findByUserName(String username);
+    Optional<Customer> findByUuid(String uuid);
 }

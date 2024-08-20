@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonAlias;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,7 +19,10 @@ public class Customer {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    private String uuid;
+    @JsonAlias({"first_name", "firstName"})
     private String firstName;
+    @JsonAlias({"last_name", "lastName"})
     private String lastName;
     private String street;
     private String address;

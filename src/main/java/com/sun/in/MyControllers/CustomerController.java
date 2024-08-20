@@ -9,7 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,10 +19,10 @@ public class CustomerController {
     @Autowired
     private CustomerService customerService;
 
-//    @GetMapping("/index")
-//    public String index() {
-//        return "index";
-//    }
+    @GetMapping("/customerHome")
+    public String customerHome() {
+        return "customerHome"; // returns the customerHome.html template
+    }
 
     @PostMapping("/createCustomer") // New customer Added by Admin
     public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer){
@@ -73,12 +72,12 @@ public class CustomerController {
         return new ResponseEntity<>(customerList.getContent(), HttpStatus.OK);
     }
 
-//    @GetMapping("/sync-customers")
-//    public ResponseEntity<String> syncCustomers() {
-//
-//        String result = syncapiService.authenticateFetchAndSyncCustomerList();
-//        return new ResponseEntity<>(result, HttpStatus.OK);
-//    }
+    @GetMapping("/syncCustomers")
+    public ResponseEntity<String> syncCustomers() {
+
+        String result = customerService.syncCustomers();
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
 
     ////////////////////////////////// JWT //////////////////////////////////
 //    @GetMapping("/current-user")

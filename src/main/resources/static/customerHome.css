@@ -1,0 +1,42 @@
+
+body {
+    background-color: #222;
+    color: white;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+}
+
+.table-dark th, .table-dark td {
+    color: #fff;
+    border-color: #454d55;
+}
+
+.table-dark thead th {
+    background-color: #343a40;
+}
+
+.modal-content {
+    background-color: #333;
+    /*color: white;*/
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+    border-bottom: 1px solid #444;
+}
+
+.form-control {
+    background-color: #444;
+    color: white;
+    border: 1px solid #555;
+}
+
+.form-control:focus {
+    background-color: #555;
+    color: white;
+    border-color: #666;
+}
+
+

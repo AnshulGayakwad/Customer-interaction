@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import com.sun.in.MyServices.UserService;
 
 @Configuration
 public class SecurityConfig {
@@ -20,17 +21,10 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService(){
-        UserDetails adminUser = User.builder().username("anshul").password(passwordEncoder().encode("anshul")).roles("ADMIN").build();
-        return new InMemoryUserDetailsManager(adminUser);
+//        UserDetails adminUser = User.builder().username("anshul").password(passwordEncoder().encode("anshul")).roles("ADMIN").build();
+//        return new InMemoryUserDetailsManager(adminUser);
+        return new UserService();
     }
-
-    ////////////////////////////////////////// Extra As Above //////////////////////////////////////////////////////////
-    @Bean
-    public UserDetailsService userDetailsService(String uName, String uPassword){
-        UserDetails adminUser = User.builder().username(uName).password(passwordEncoder().encode(uPassword)).roles("ADMIN").build();
-        return new InMemoryUserDetailsManager(adminUser);
-    }
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration builder) throws Exception {

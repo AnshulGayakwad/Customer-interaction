@@ -4,6 +4,7 @@ import com.sun.in.MyEntities.AllUsers;
 import com.sun.in.MyEntities.JwtRequest;
 import com.sun.in.MyEntities.JwtResponse;
 import com.sun.in.MyRepositories.UserRepo;
+import com.sun.in.MyServices.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,15 +14,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.sun.in.Security.JwtHelper;
 
 @RestController
 @RequestMapping("/auth")
 public class JwtAuthController {
+//    @Autowired
+//    private UserService userDetailsService;
     @Autowired
     private UserDetailsService userDetailsService;
     @Autowired
@@ -33,9 +33,12 @@ public class JwtAuthController {
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody JwtRequest request){
-        doAuthenticate(request.getUsername(), request.getPassword());
+        //doAuthenticate(request.getUsername(), request.getPassword());
 
         final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
+        if(userDetails == null){
+            return new ResponseEntity<>(new JwtResponse(), HttpStatus.NOT_FOUND);
+        }
         final String token = helper.generateToken(userDetails);
 
         JwtResponse response = JwtResponse.builder()
@@ -44,15 +47,15 @@ public class JwtAuthController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    private void doAuthenticate(String username, String password) {
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username, password);
-        try {
-            manager.authenticate(authentication);
-        }
-        catch (BadCredentialsException e) {
-            throw new BadCredentialsException(" Invalid Username or Password  !!" + e.getMessage());
-        }
-    }
+//    private void doAuthenticate(String username, String password) {
+//        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username, password);
+//        try {
+//            manager.authenticate(authentication);
+//        }
+//        catch (BadCredentialsException e) {
+//            throw new BadCredentialsException(" Invalid Username or Password  !!" + e.getMessage());
+//        }
+//    }
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody JwtRequest jwtRequest){

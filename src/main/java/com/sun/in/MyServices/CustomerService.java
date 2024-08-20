@@ -1,22 +1,30 @@
 package com.sun.in.MyServices;
 
-import com.sun.in.MyEntities.AllUsers;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.in.MyEntities.Customer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import com.sun.in.MyRepositories.CustomerRepo;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class CustomerService {
     @Autowired
-    private CustomerRepo cRepo;
+    private CustomerRepo customerRepo;
+
+    @Autowired
+    private RestTemplate restTemplate;
 //////////////////////////////////// Extra ////////////////////////////////////////////////////////////
 //    private final PasswordEncoder passwordEncoder; // Encoder to hash user passwords
 //    private final AuthenticationManager authenticationManager; // Manages authentication processes
@@ -43,11 +51,11 @@ public class CustomerService {
 
     // Method to create a new customer
     public Customer createCustomer (Customer customer) {
-        return cRepo.save(customer);
+        return customerRepo.save(customer);
     }
 
     public Customer updateCustomer(Long id, Customer customerDetails) {
-        Customer customer = cRepo.findById(id).orElseThrow(() -> new RuntimeException("Customer not found"));
+        Customer customer = customerRepo.findById(id).orElseThrow(() -> new RuntimeException("Customer not found"));
 
         customer.setFirstName(customerDetails.getFirstName());
         customer.setLastName(customerDetails.getLastName());
@@ -58,24 +66,108 @@ public class CustomerService {
         customer.setEmail(customerDetails.getEmail());
         customer.setPhone(customerDetails.getPhone());
 
-        return cRepo.save(customer);
+        return customerRepo.save(customer);
     }
 
     public void deleteCustomer(Long id) {
-        Customer customer = cRepo.findById(id).orElseThrow(() -> new RuntimeException("Customer not found"));
-        cRepo.delete(customer);
+        Customer customer = customerRepo.findById(id).orElseThrow(() -> new RuntimeException("Customer not found"));
+        customerRepo.delete(customer);
     }
 
     public Customer getCustomerById(Long id) {
-        return cRepo.findById(id).orElseThrow(() -> new RuntimeException("Customer not found"));
+        return customerRepo.findById(id).orElseThrow(() -> new RuntimeException("Customer not found"));
     }
 
     public Page<Customer> getAllCustomers(Pageable pageable) {
-        return cRepo.findAll(pageable);
+        return customerRepo.findAll(pageable);
     }
 
     public Page<Customer> searchCustomers(String searchType, String searchText, int page, int size) {
-        return cRepo.findByFirstNameContainingOrCityContainingOrEmailContainingOrPhoneContaining(
+        return customerRepo.findByFirstNameContainingOrCityContainingOrEmailContainingOrPhoneContaining(
                 searchText, searchText, searchText, searchText, PageRequest.of(page, size, Sort.by(searchType)));
+    }
+
+    //////////////////////////////////////////// SYNC COUSTOMERS //////////////////////////////////////////
+
+    public String syncCustomers() {
+        try {
+            // Step 1: Authenticate and get Bearer Token
+            String authUrl = "https://qa.sunbasedata.com/sunbase/portal/api/assignment_auth.jsp";
+            String customerUrl = "https://qa.sunbasedata.com/sunbase/portal/api/assignment.jsp";
+
+            // Request Body for Authentication
+            Map<String, String> authRequestBody = new HashMap<>();
+            authRequestBody.put("login_id", "test@sunbasedata.com");
+            authRequestBody.put("password", "Test@123");
+
+            // Make Authentication Request
+            HttpHeaders authHeaders = new HttpHeaders();
+            authHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<Map<String, String>> authRequest = new HttpEntity<>(authRequestBody, authHeaders);
+            ResponseEntity<String> authResponse = restTemplate.postForEntity(authUrl, authRequest, String.class);
+
+            if (authResponse.getStatusCode() != HttpStatus.OK) {
+                return "Failed to authenticate";
+            }
+
+            // Convert the response body to a Map
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> authResponseBody = objectMapper.readValue(authResponse.getBody(), Map.class);
+
+            if (!authResponseBody.containsKey("access_token")) {
+                return "Failed to retrieve token";
+            }
+
+            String token = (String) authResponseBody.get("access_token");
+
+            // Step 2: Get Customer List
+            HttpHeaders customerHeaders = new HttpHeaders();
+            customerHeaders.setBearerAuth(token);
+            HttpEntity<Void> customerRequest = new HttpEntity<>(customerHeaders);
+
+            ResponseEntity<Customer[]> customerResponse = restTemplate.exchange(
+                    customerUrl + "?cmd=get_customer_list",
+                    HttpMethod.GET,
+                    customerRequest,
+                    Customer[].class
+            );
+
+            if (customerResponse.getStatusCode() != HttpStatus.OK || customerResponse.getBody() == null) {
+                return "Failed to retrieve token";
+            }
+
+            // Step 3: Save or Update Customers in Database
+            Customer[] customers = customerResponse.getBody();
+            for (Customer customer : customers) {
+                Optional<Customer> existingCustomer = customerRepo.findByUuid(customer.getUuid());
+
+                if (existingCustomer.isPresent()) {
+                    // Update existing customer
+                    Customer updatedCustomer = existingCustomer.get();
+                    updatedCustomer.setFirstName(customer.getFirstName());
+                    updatedCustomer.setLastName(customer.getLastName());
+                    updatedCustomer.setStreet(customer.getStreet());
+                    updatedCustomer.setAddress(customer.getAddress());
+                    updatedCustomer.setCity(customer.getCity());
+                    updatedCustomer.setState(customer.getState());
+                    updatedCustomer.setEmail(customer.getEmail());
+                    updatedCustomer.setPhone(customer.getPhone());
+
+                    // Save the updated customer
+                    customerRepo.save(updatedCustomer);
+                    System.out.println("Updated customer with UUID: " + customer.getUuid());
+                } else {
+                    // Save new customer
+                    customerRepo.save(customer);
+                    System.out.println("Saved new customer with UUID: " + customer.getUuid());
+                }
+            }
+
+            return "Sync Completed";
+        } catch (Exception e) {
+            e.printStackTrace(); // Log the exception
+            return "Failed to sync customers: " + e.getMessage();
+        }
     }
 }
