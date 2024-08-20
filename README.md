@@ -76,4 +76,18 @@ http://localhost:8080/
 - **JWT Authentication**: Secure the API using JWT for authentication.
 
 ### Application Screenshots
+### Home Screen
+![logo](https://github.com/AnshulGayakwad/Customer-interaction/blob/main/Screenshots/Home%20Page.png)
+
+### Login Screen
+![logo](https://github.com/AnshulGayakwad/Customer-interaction/blob/main/Screenshots/login.png)
+
+### Customer-Home Screen
+![logo](https://github.com/AnshulGayakwad/Customer-interaction/blob/main/Screenshots/customerHome.png)
+
+### Add Customer Screen
+![logo](https://github.com/AnshulGayakwad/Customer-interaction/blob/main/Screenshots/addCustomer.png)
+
+### Edit Customer Screen
+![logo](https://github.com/AnshulGayakwad/Customer-interaction/blob/main/Screenshots/editCustomer.png)
 
