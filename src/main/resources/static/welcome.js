@@ -48,7 +48,8 @@ document.getElementById('loginSubmit').addEventListener('click', async () => {
                   }
     } catch (error) {
         loginError.classList.remove('d-none');
-        loginError.textContent = 'An error occurred. Please try again later.';
+        loginError.textContent = 'Invalid credentials. Please try again.';
+//        loginError.textContent = 'An error occurred. Please try again later.';
     }
 });
 

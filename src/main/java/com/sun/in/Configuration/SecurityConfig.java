@@ -19,12 +19,12 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public UserDetailsService userDetailsService(){
-//        UserDetails adminUser = User.builder().username("anshul").password(passwordEncoder().encode("anshul")).roles("ADMIN").build();
-//        return new InMemoryUserDetailsManager(adminUser);
-        return new UserService();
-    }
+//    @Bean
+//    public UserDetailsService userDetailsService(){
+////        UserDetails adminUser = User.builder().username("anshul").password(passwordEncoder().encode("anshul")).roles("ADMIN").build();
+////        return new InMemoryUserDetailsManager(adminUser);
+//        return new UserService();
+//    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration builder) throws Exception {

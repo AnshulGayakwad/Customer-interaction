@@ -28,11 +28,11 @@ public class SecurityFilterConfig {
 //                                                .anyRequest().authenticated()
                 )
 
-//                .formLogin(form -> form.loginPage("/login").permitAll())
+//                .formLogin(form -> form.loginPage("/").permitAll())
 //                        //.defaultSuccessUrl("/home/").permitAll())
 //                .logout(form -> form.invalidateHttpSession(true).clearAuthentication(true)
-//                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-//                    .logoutSuccessUrl("/login?logout").permitAll())
+//                    .logoutRequestMatcher(new AntPathRequestMatcher("/"))
+//                    .logoutSuccessUrl("/").permitAll())
 
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(point))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

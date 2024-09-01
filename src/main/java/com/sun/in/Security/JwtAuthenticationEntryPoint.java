@@ -14,8 +14,15 @@ import java.io.PrintWriter;
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+        // Set HTTP status to 401 (Unauthorized)
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        PrintWriter writer = response.getWriter();
-        writer.println("Access Denied !! " + authException.getMessage());
+
+        // Set the 'refresh' header for a 2-second delay before redirecting to the home page
+        response.setHeader("Refresh", "5;URL=" + request.getContextPath() + "/");
+
+        // Write the message to the response body
+        response.setContentType("text/plain");
+        response.getWriter().write("Access Denied: " + authException.getMessage() + "\nRedirecting to home page in 5 seconds...");
+
     }
 }

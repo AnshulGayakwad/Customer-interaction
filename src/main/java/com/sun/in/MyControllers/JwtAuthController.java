@@ -13,7 +13,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import com.sun.in.Security.JwtHelper;
 
@@ -27,6 +27,8 @@ public class JwtAuthController {
     @Autowired
     private AuthenticationManager manager;
     @Autowired
+    private PasswordEncoder encoder;
+    @Autowired
     private JwtHelper helper;
     @Autowired
     private UserRepo userRepo;
@@ -36,7 +38,7 @@ public class JwtAuthController {
         //doAuthenticate(request.getUsername(), request.getPassword());
 
         final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-        if(userDetails == null){
+        if(userDetails == null || userDetails.getPassword().equals(encoder.encode(request.getPassword())) ){
             return new ResponseEntity<>(new JwtResponse(), HttpStatus.NOT_FOUND);
         }
         final String token = helper.generateToken(userDetails);
@@ -62,7 +64,10 @@ public class JwtAuthController {
         if(userRepo.findByUsername(jwtRequest.getUsername()).isPresent()){
             return new ResponseEntity<>("Username already exists!", HttpStatus.CONFLICT);
         }
-        AllUsers user = AllUsers.builder().username(jwtRequest.getUsername()).password(jwtRequest.getPassword()).build();
+        AllUsers user = AllUsers.builder()
+                        .username(jwtRequest.getUsername())
+                        .password(encoder.encode(jwtRequest.getPassword()))
+                        .build();
         userRepo.save(user);
         return new ResponseEntity<>("User registered successfully!", HttpStatus.OK);
     }
